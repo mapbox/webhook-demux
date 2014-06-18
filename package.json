@@ -1,0 +1,28 @@
+{
+  "name": "webhook-router",
+  "version": "0.0.0",
+  "description": "route webhooks to webhooks",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mapbox/webhook-demux.git"
+  },
+  "keywords": [
+    "webhook",
+    "demux"
+  ],
+  "author": "Tom MacWright",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mapbox/webhook-demux/issues"
+  },
+  "homepage": "https://github.com/mapbox/webhook-demux",
+  "dependencies": {
+    "minimist": "~0.1.0",
+    "underscore": "~1.6.0",
+    "concat-stream": "~1.4.6"
+  }
+}
