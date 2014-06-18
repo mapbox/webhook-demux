@@ -17,6 +17,7 @@ if (fs.existsSync(argv.config)) {
 
 config.forEach(function(c) {
     c.parsed_url = url.parse(c.url);
+    c.matcher = _.matches(c.match);
 });
 
 var server = http.createServer(handleRequest);
@@ -32,7 +33,7 @@ function handleRequest(req, res) {
                 var requestData = JSON.parse(requestBody);
                 res.end();
                 for (var i = 0; i < config.length; i++) {
-                    if (_.match(requestData, config[i])) {
+                    if (config[i].matcher(requestData)) {
                         return route(requestData, req, res, config[i]);
                     }
                 }
