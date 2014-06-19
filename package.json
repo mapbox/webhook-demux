@@ -4,7 +4,8 @@
   "description": "route webhooks to webhooks",
   "main": "index.js",
   "scripts": {
-    "test": "tap"
+    "test": "tape test/test.js",
+    "cov": "istanbul cover ./node_modules/.bin/tape test/test.js && coveralls < coverage/lcov.info"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,9 @@
     "concat-stream": "~1.4.6"
   },
   "devDependencies": {
-    "tap": "~0.4.11"
+    "tap": "~0.4.11",
+    "coveralls": "~2.10.0",
+    "istanbul": "~0.2.11",
+    "tape": "~2.13.3"
   }
 }

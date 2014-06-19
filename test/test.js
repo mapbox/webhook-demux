@@ -1,4 +1,4 @@
-var test = require('tap').test,
+var test = require('tape'),
     http = require('http'),
     concat = require('concat-stream'),
     receiver = require('./receiver'),
@@ -14,7 +14,7 @@ test('webhook-demux no config', function(t) {
     var server = http.createServer(handler);
     server.listen(0);
     server.on('listening', function() {
-        var req = send(cats, server.address().port);
+        var req = send(JSON.stringify(cats), server.address().port, 'POST');
         req.on('response', function(resp) {
             resp.pipe(concat(function(data) {
                 t.deepEqual(data, []);
@@ -28,33 +28,88 @@ test('webhook-demux no config', function(t) {
 
 test('webhook-demux with config', function(t) {
     var server;
-    receiver(t, [cats],
-    function(port) {
+    receiver(function(recv) {
         var config = [{
             match: { cats: true },
-            url: 'http://localhost:' + port
+            url: 'http://localhost:' + recv.port
         }];
         var handler = webhookDemux(config);
         server = http.createServer(handler);
         server.listen(0);
         server.on('listening', function() {
-            send(dogs, server.address().port);
-            send(cats, server.address().port);
-        });
-    },
-    function() {
-        server.close(function() {
-            t.end();
+            send(JSON.stringify(dogs), server.address().port, 'POST');
+            send('invalid', server.address().port, 'POST');
+            send(JSON.stringify(cats), server.address().port, 'POST');
+            setTimeout(function() {
+                t.deepEqual(recv.received, [cats]);
+                recv.server.close(function() {
+                    server.close(function() {
+                        t.end();
+                    });
+                });
+            }, 500);
         });
     });
 });
 
-function send(data, port) {
+test('webhook-demux with config and PUT', function(t) {
+    var server;
+    receiver(function(recv) {
+        var config = [{
+            match: { cats: true },
+            url: 'http://localhost:' + recv.port
+        }];
+        var handler = webhookDemux(config);
+        server = http.createServer(handler);
+        server.listen(0);
+        server.on('listening', function() {
+            send(JSON.stringify(dogs), server.address().port, 'POST');
+            send('invalid', server.address().port, 'POST');
+            send(JSON.stringify(cats), server.address().port, 'PUT');
+            setTimeout(function() {
+                t.deepEqual(recv.received, [cats]);
+                recv.server.close(function() {
+                    server.close(function() {
+                        t.end();
+                    });
+                });
+            }, 500);
+        });
+    });
+});
+
+test('webhook-demux with config and GET', function(t) {
+    var server;
+    receiver(function(recv) {
+        var config = [{
+            match: { cats: true },
+            url: 'http://localhost:' + recv.port
+        }];
+        var handler = webhookDemux(config);
+        server = http.createServer(handler);
+        server.listen(0);
+        server.on('listening', function() {
+            send(JSON.stringify(dogs), server.address().port, 'POST');
+            send('invalid', server.address().port, 'GET');
+            send(JSON.stringify(cats), server.address().port, 'PUT');
+            setTimeout(function() {
+                t.deepEqual(recv.received, [cats]);
+                recv.server.close(function() {
+                    server.close(function() {
+                        t.end();
+                    });
+                });
+            }, 500);
+        });
+    });
+});
+
+function send(data, port, method) {
     var req = http.request({
         port: port,
         host: 'localhost',
-        method: 'POST'
+        method: method
     });
-    req.end(JSON.stringify(data));
+    req.end(data);
     return req;
 }
