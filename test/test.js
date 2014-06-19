@@ -26,6 +26,12 @@ test('webhook-demux no config', function(t) {
     });
 });
 
+test('webhook-demux simple config', function(t) {
+    var config = [{ url: 'http://localhost:5000' }];
+    var handler = webhookDemux(config);
+    t.end();
+});
+
 function send(data, port, method) {
     var req = http.request({
         port: port,
