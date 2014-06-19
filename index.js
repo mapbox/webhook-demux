@@ -14,14 +14,14 @@ module.exports = function(config) {
         if (req.method === 'POST' || req.method === 'PUT') {
             req.pipe(concat(function(requestBody) {
                 try {
-                    var requestData = JSON.parse(requestBody);
+                    var requestData = JSON.parse(requestBody.toString());
                     for (var i = 0; i < config.length; i++) {
                         if (config[i].matcher(requestData)) {
                             route(requestData, req, res, config[i]);
                         }
                     }
                 } catch(e) {
-                    console.error('could not parse json body');
+                    console.error(e);
                 } finally {
                     res.writeHead(200);
                     res.end('');
