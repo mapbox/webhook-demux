@@ -17,7 +17,7 @@ module.exports = function(config) {
                     var requestData = JSON.parse(requestBody);
                     for (var i = 0; i < config.length; i++) {
                         if (config[i].matcher(requestData)) {
-                            return route(requestData, req, res, config[i]);
+                            route(requestData, req, res, config[i]);
                         }
                     }
                 } catch(e) {
