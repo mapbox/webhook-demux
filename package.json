@@ -24,5 +24,8 @@
     "minimist": "~0.1.0",
     "underscore": "~1.6.0",
     "concat-stream": "~1.4.6"
+  },
+  "devDependencies": {
+    "tap": "~0.4.11"
   }
 }

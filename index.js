@@ -1,56 +1,46 @@
-var http = require('http'),
-    fs = require('fs'),
-    _ = require('underscore'),
-    concat = require('concat-stream'),
+var concat = require('concat-stream'),
     url = require('url'),
-    argv = require('minimist')(process.argv.slice(2));
+    _ = require('underscore'),
+    http = require('http');
 
-argv.config = argv.config || 'config.json';
+module.exports = function(config) {
 
-var config = [];
+    config.forEach(function(c) {
+        c.parsed_url = url.parse(c.url);
+        c.matcher = _.matches(c.match);
+    });
 
-if (fs.existsSync(argv.config)) {
-    config = JSON.parse(fs.readFileSync(argv.config));
-} else {
-    console.error('no config file found, no rules in effect.');
-}
-
-config.forEach(function(c) {
-    c.parsed_url = url.parse(c.url);
-    c.matcher = _.matches(c.match);
-});
-
-var server = http.createServer(handleRequest);
-
-server.listen(3000, function() {
-    console.error('server listening on port', server.address().port);
-});
-
-function handleRequest(req, res) {
-    if (req.method === 'POST' || req.method === 'PUT') {
-        req.pipe(concat(function(requestBody) {
-            try {
-                var requestData = JSON.parse(requestBody);
-                res.end();
-                for (var i = 0; i < config.length; i++) {
-                    if (config[i].matcher(requestData)) {
-                        return route(requestData, req, res, config[i]);
+    function handleRequest(req, res) {
+        if (req.method === 'POST' || req.method === 'PUT') {
+            req.pipe(concat(function(requestBody) {
+                try {
+                    var requestData = JSON.parse(requestBody);
+                    for (var i = 0; i < config.length; i++) {
+                        if (config[i].matcher(requestData)) {
+                            return route(requestData, req, res, config[i]);
+                        }
                     }
+                } catch(e) {
+                    console.error('could not parse json body');
+                } finally {
+                    res.writeHead(200);
+                    res.end('');
                 }
-            } catch(e) {
-                res.end();
-            }
-        }));
-    } else {
-        res.end('post and put only');
+            }));
+        } else {
+            res.writeHead(200);
+            res.end('');
+        }
     }
-}
 
-function route(data, incomingRequest, response, config) {
-    var req = http.request(_.extend(config.parsed_url, {
-        headers: incomingRequest.headers,
-        method: incomingRequest.method
-    }));
-    req.write(JSON.stringify(data));
-    req.end();
-}
+    function route(data, incomingRequest, response, config) {
+        var req = http.request(_.extend(config.parsed_url, {
+            headers: incomingRequest.headers,
+            method: incomingRequest.method
+        }));
+        req.write(JSON.stringify(data));
+        req.end();
+    }
+
+    return handleRequest;
+};
