@@ -26,6 +26,98 @@ test('webhook-demux no config', function(t) {
     });
 });
 
+test('webhook-demux receiver', function(t) {
+    receiver(function(recv) {
+        var config = [{
+            url: 'http://' + recv.server.address().address + ':' + recv.port + '/'
+        }];
+        var handler = webhookDemux(config);
+        t.ok(handler, 'creates handler');
+        var server = http.createServer(handler);
+        server.listen(0);
+        server.on('listening', function() {
+            var req = send(JSON.stringify(cats), server.address().port, 'POST');
+            setTimeout(function() {
+                t.deepEqual(recv.received, [cats], 'got cats');
+                recv.server.close(function() {
+                    server.close(function() {
+                        t.end();
+                    });
+                });
+            }, 100);
+        });
+    });
+});
+
+test('webhook-demux receiver w PUT', function(t) {
+    receiver(function(recv) {
+        var config = [{
+            url: 'http://' + recv.server.address().address + ':' + recv.port + '/'
+        }];
+        var handler = webhookDemux(config);
+        t.ok(handler, 'creates handler');
+        var server = http.createServer(handler);
+        server.listen(0);
+        server.on('listening', function() {
+            var req = send(JSON.stringify(cats), server.address().port, 'PUT');
+            setTimeout(function() {
+                t.deepEqual(recv.received, [cats], 'got cats');
+                recv.server.close(function() {
+                    server.close(function() {
+                        t.end();
+                    });
+                });
+            }, 100);
+        });
+    });
+});
+
+test('webhook-demux receiver w INVALID', function(t) {
+    receiver(function(recv) {
+        var config = [{
+            url: 'http://' + recv.server.address().address + ':' + recv.port + '/'
+        }];
+        var handler = webhookDemux(config);
+        t.ok(handler, 'creates handler');
+        var server = http.createServer(handler);
+        server.listen(0);
+        server.on('listening', function() {
+            var req = send('invalid', server.address().port, 'PUT');
+            setTimeout(function() {
+                t.deepEqual(recv.received, [], 'got nothing');
+                recv.server.close(function() {
+                    server.close(function() {
+                        t.end();
+                    });
+                });
+            }, 100);
+        });
+    });
+});
+
+test('webhook-demux receiver w GET', function(t) {
+    receiver(function(recv) {
+        var config = [{
+            url: 'http://' + recv.server.address().address + ':' + recv.port + '/'
+        }];
+        var handler = webhookDemux(config);
+        t.ok(handler, 'creates handler');
+        var server = http.createServer(handler);
+        server.listen(0);
+        server.on('listening', function() {
+            var req = send('invalid', server.address().port, 'GET');
+            setTimeout(function() {
+                t.deepEqual(recv.received, [], 'got nothing');
+                recv.server.close(function() {
+                    server.close(function() {
+                        t.end();
+                    });
+                });
+            }, 100);
+        });
+    });
+});
+
 test('webhook-demux simple config', function(t) {
     var config = [{ url: 'http://localhost:5000' }];
     var handler = webhookDemux(config);

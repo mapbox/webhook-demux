@@ -40,7 +40,7 @@ module.exports = function(config) {
                 'content-length': JSON.stringify(data).length
             },
             method: incomingRequest.method,
-            port: protocol === https ? 443 : 80
+            port: config.parsed_url.port || (protocol === https ? 443 : 80)
         });
 
         var req = protocol.request(opts);
