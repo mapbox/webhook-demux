@@ -12,7 +12,6 @@ file (or whatever's in the `--config` argument) that looks like:
 
 ```js
 [{
-    "match": { "type": "blue" },
     "url": "http://blue.com/"
 }]
 ```
