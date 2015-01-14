@@ -34,10 +34,12 @@ module.exports = function(config) {
         var protocol = config.parsed_url.protocol === 'https:' ?
             https : http;
 
+        var d = new Buffer(JSON.stringify(data));
+
         var opts = _.extend(config.parsed_url, {
             headers: {
                 'content-type': 'application/json',
-                'content-length': JSON.stringify(data).length
+                'content-length': d.length
             },
             method: incomingRequest.method,
             port: config.parsed_url.port || (protocol === https ? 443 : 80)
@@ -61,7 +63,7 @@ module.exports = function(config) {
             console.log(e);
         });
 
-        req.end(JSON.stringify(data));
+        req.end(d);
     }
     return handleRequest;
 };
