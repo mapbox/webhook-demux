@@ -15,8 +15,3 @@ file (or whatever's in the `--config` argument) that looks like:
     "url": "http://blue.com/"
 }]
 ```
-
-Match is a JavaScript object with a subset of properties that should
-[_.matches](http://underscorejs.org/#matches) a request data
-subset. Then it routes the same exact request with the same headers
-and method to a different url, given by `url`.
