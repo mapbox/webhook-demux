@@ -1,6 +1,6 @@
 {
-  "name": "webhook-router",
-  "version": "0.0.1",
+  "name": "webhook-demux",
+  "version": "0.0.2",
   "description": "route webhooks to webhooks",
   "main": "index.js",
   "scripts": {
